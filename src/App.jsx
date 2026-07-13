@@ -216,8 +216,9 @@ function App() {
 
             {/* CTA Button */}
             <a
-              href="#buy-section"
-              onClick={scrollToBuy}
+              href="https://whop.com/shoraminimalist/the-complete-bundle/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-base px-8 py-4 rounded-md shadow-premium hover-lift mb-10 transition-colors"
             >
               Buy Now <ChevronRight className="w-5 h-5 ml-1" />
@@ -676,12 +677,14 @@ function App() {
               </div>
 
               {/* CTA Purchase Button */}
-              <button
-                onClick={() => alert(`Redirecting to payment for ${quantity} ADHD Planner(s)...`)}
-                className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-lg px-8 py-4 rounded-md shadow-premium hover-lift mb-8 flex items-center justify-center transition-colors"
+              <a
+                href="https://whop.com/shoraminimalist/the-complete-bundle/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-lg px-8 py-4 rounded-md shadow-premium hover-lift mb-8 flex items-center justify-center transition-colors text-center"
               >
                 Buy Now <ChevronRight className="w-5 h-5 ml-1" />
-              </button>
+              </a>
 
               {/* Buy Section Info Accordion-style Tabs */}
               <div className="w-full bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
