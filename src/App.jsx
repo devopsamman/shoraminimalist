@@ -216,7 +216,7 @@ function App() {
 
             {/* CTA Button */}
             <a
-              href="https://whop.com/shoraminimalist/the-complete-bundle/"
+              href="https://buy.stripe.com/4gMeVd0iy6w8esB73K63K00"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-base px-8 py-4 rounded-md shadow-premium hover-lift mb-10 transition-colors"
@@ -678,7 +678,7 @@ function App() {
 
               {/* CTA Purchase Button */}
               <a
-                href="https://whop.com/shoraminimalist/the-complete-bundle/"
+                href="https://buy.stripe.com/4gMeVd0iy6w8esB73K63K00"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-lg px-8 py-4 rounded-md shadow-premium hover-lift mb-8 flex items-center justify-center transition-colors text-center"
