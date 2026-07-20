@@ -152,7 +152,7 @@ const PRODUCTS = {
     price: 19.99,
     originalPrice: 39.99,
     announcement: 'Done-for-you PLR digital product - Editable Canva template',
-    stripeUrl: 'https://buy.stripe.com/your-stripe-food-swaps-link', // Placeholder for user customization
+    stripeUrl: 'https://buy.stripe.com/8x214nghw6w8cktgEk63K01',
     category: 'CANVA TEMPLATE',
     theme: {
       accent: '#009966', // brand-green
