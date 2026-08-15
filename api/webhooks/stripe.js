@@ -182,13 +182,29 @@ export const config = {
  * Reads the raw request body as a Buffer.
  * Required for Stripe webhook signature verification.
  */
-function getRawBody(req) {
-  return new Promise((resolve, reject) => {
+async function getRawBody(req) {
+  if (req.rawBody) {
+    return typeof req.rawBody === 'string' ? Buffer.from(req.rawBody) : req.rawBody;
+  }
+  if (Buffer.isBuffer(req.body)) {
+    return req.body;
+  }
+  if (typeof req.body === 'string') {
+    return Buffer.from(req.body);
+  }
+  if (req.readable !== false) {
     const chunks = [];
-    req.on('data', (chunk) => chunks.push(chunk));
-    req.on('end', () => resolve(Buffer.concat(chunks)));
-    req.on('error', reject);
-  });
+    for await (const chunk of req) {
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    }
+    if (chunks.length > 0) {
+      return Buffer.concat(chunks);
+    }
+  }
+  if (req.body && typeof req.body === 'object') {
+    return Buffer.from(JSON.stringify(req.body));
+  }
+  return Buffer.from('');
 }
 
 export default async function handler(req, res) {
