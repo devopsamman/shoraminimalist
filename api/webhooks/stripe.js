@@ -132,15 +132,17 @@ async function createShopifyOrder(session) {
 
 /**
  * Check if an order with this Stripe session ID already exists in Shopify.
- * Prevents duplicate orders if Stripe sends the webhook more than once.
+ * Prevents duplicate orders if Stripe sends the webhook more than once (retries).
  */
 async function checkDuplicateOrder(stripeSessionId) {
+  if (!stripeSessionId) return false;
+
   const shopifyDomain = process.env.SHOPIFY_STORE_DOMAIN;
   const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
   const apiVersion = '2026-07';
 
-  // Search for orders tagged with this Stripe session ID
-  const url = `https://${shopifyDomain}/admin/api/${apiVersion}/orders.json?status=any&tag=stripe&limit=10`;
+  // Fetch recent orders to verify if this stripeSessionId was already processed
+  const url = `https://${shopifyDomain}/admin/api/${apiVersion}/orders.json?status=any&limit=100&fields=id,name,note,note_attributes`;
 
   try {
     const response = await fetch(url, {
@@ -150,21 +152,25 @@ async function checkDuplicateOrder(stripeSessionId) {
       },
     });
 
-    if (!response.ok) return false;
+    if (!response.ok) {
+      console.warn('Could not query Shopify orders for duplicate check:', response.status);
+      return false;
+    }
 
     const data = await response.json();
     const orders = data.orders || [];
 
-    // Check if any order has this Stripe session ID in note_attributes
+    // Check if any existing order contains this Stripe session ID in note or note_attributes
     return orders.some((order) => {
-      const attrs = order.note_attributes || [];
-      return attrs.some(
-        (attr) => attr.name === 'stripe_session_id' && attr.value === stripeSessionId
+      const inNote = order.note && typeof order.note === 'string' && order.note.includes(stripeSessionId);
+      const inAttrs = Array.isArray(order.note_attributes) && order.note_attributes.some(
+        (attr) => attr.value === stripeSessionId || (attr.name === 'stripe_session_id' && attr.value === stripeSessionId)
       );
+      return inNote || inAttrs;
     });
   } catch (err) {
     console.error('Error checking for duplicate orders:', err);
-    return false; // Allow order creation on error to avoid lost orders
+    return false;
   }
 }
 
