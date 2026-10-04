@@ -1,284 +1,431 @@
-import Stripe from 'stripe';
-
-// ============================================================================
-// Stripe Webhook → Shopify Order Sync
-// ============================================================================
-// This Vercel serverless function receives Stripe `checkout.session.completed`
-// webhooks, verifies them, and creates a corresponding order in Shopify via
-// the Admin REST API. This triggers Shopify's built-in order notifications.
-// ============================================================================
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Product mapping: maps Stripe Payment Link metadata to Shopify order details
-const PRODUCT_MAP = {
-  'cleaning-planner': {
-    title: 'ADHD-Friendly Daily Cleaning Planner',
-    price: '29.99',
-    sku: 'SHORA-ADHD-PLANNER',
-  },
-  'food-swaps': {
-    title: 'Done For You Guide on 30 Healthy Food Swaps',
-    price: '19.99',
-    sku: 'SHORA-FOOD-SWAPS',
-  },
-};
-
-/**
- * Creates an order in Shopify Admin using the REST API.
- * Uses custom line_items (title + price) — no Shopify products needed.
- */
-async function createShopifyOrder(session) {
-  const shopifyDomain = process.env.SHOPIFY_STORE_DOMAIN;
-  const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
-
-  // Extract customer info from Stripe session
-  const customerEmail = session.customer_details?.email || session.customer_email || '';
-  const customerName = session.customer_details?.name || '';
-  const [firstName, ...lastParts] = customerName.split(' ');
-  const lastName = lastParts.join(' ') || '';
-
-  // Determine which product was purchased from metadata or line items
-  const productId = session.metadata?.product_id || null;
-  const product = productId && PRODUCT_MAP[productId] ? PRODUCT_MAP[productId] : null;
-
-  // Build line_items — either from our product map or from Stripe session data
-  let lineItems;
-  if (product) {
-    lineItems = [
-      {
-        title: product.title,
-        quantity: parseInt(session.metadata?.quantity, 10) || 1,
-        price: product.price,
-        sku: product.sku,
-        requires_shipping: false, // Digital product
-        taxable: false,
-      },
-    ];
-  } else {
-    // Fallback: create a generic line item from Stripe amount
-    const amountTotal = session.amount_total ? (session.amount_total / 100).toFixed(2) : '0.00';
-    lineItems = [
-      {
-        title: 'Shoraminimalist Digital Product',
-        quantity: 1,
-        price: amountTotal,
-        requires_shipping: false,
-        taxable: false,
-      },
-    ];
-  }
-
-  // Build the Shopify order payload
-  const orderPayload = {
-    order: {
-      line_items: lineItems,
-      email: customerEmail,
-      financial_status: 'paid', // Already paid via Stripe
-      fulfillment_status: 'fulfilled', // Digital product — auto-fulfilled
-      send_receipt: true, // Send order confirmation email
-      send_fulfillment_receipt: true, // Send fulfillment notification
-      note: `Stripe Payment ID: ${session.payment_intent || session.id}`,
-      note_attributes: [
-        { name: 'stripe_session_id', value: session.id },
-        { name: 'stripe_payment_intent', value: session.payment_intent || '' },
-        { name: 'source', value: 'shoraminimalist.com' },
-      ],
-      tags: 'stripe, website-order',
-      customer: {
-        first_name: firstName || 'Customer',
-        last_name: lastName || '',
-        email: customerEmail,
-      },
-      // Include billing address if available from Stripe
-      ...(session.customer_details?.address && {
-        billing_address: {
-          first_name: firstName || 'Customer',
-          last_name: lastName || '',
-          address1: session.customer_details.address.line1 || '',
-          address2: session.customer_details.address.line2 || '',
-          city: session.customer_details.address.city || '',
-          province: session.customer_details.address.state || '',
-          country: session.customer_details.address.country || '',
-          zip: session.customer_details.address.postal_code || '',
-        },
-      }),
-    },
-  };
-
-  // Call Shopify Admin REST API to create the order
-  const apiVersion = '2026-07';
-  const url = `https://${shopifyDomain}/admin/api/${apiVersion}/orders.json`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': accessToken,
-    },
-    body: JSON.stringify(orderPayload),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.error('Shopify API Error:', response.status, errorBody);
-    throw new Error(`Shopify API error: ${response.status} — ${errorBody}`);
-  }
-
-  const data = await response.json();
-  console.log('Shopify order created successfully:', data.order?.id, data.order?.name);
-  return data;
-}
-
-/**
- * Check if an order with this Stripe session ID already exists in Shopify.
- * Prevents duplicate orders if Stripe sends the webhook more than once (retries).
- */
-async function checkDuplicateOrder(stripeSessionId) {
-  if (!stripeSessionId) return false;
-
-  const shopifyDomain = process.env.SHOPIFY_STORE_DOMAIN;
-  const accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
-  const apiVersion = '2026-07';
-
-  // Fetch recent orders to verify if this stripeSessionId was already processed
-  const url = `https://${shopifyDomain}/admin/api/${apiVersion}/orders.json?status=any&limit=100&fields=id,name,note,note_attributes`;
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken,
-      },
-    });
-
-    if (!response.ok) {
-      console.warn('Could not query Shopify orders for duplicate check:', response.status);
-      return false;
-    }
-
-    const data = await response.json();
-    const orders = data.orders || [];
-
-    // Check if any existing order contains this Stripe session ID in note or note_attributes
-    return orders.some((order) => {
-      const inNote = order.note && typeof order.note === 'string' && order.note.includes(stripeSessionId);
-      const inAttrs = Array.isArray(order.note_attributes) && order.note_attributes.some(
-        (attr) => attr.value === stripeSessionId || (attr.name === 'stripe_session_id' && attr.value === stripeSessionId)
-      );
-      return inNote || inAttrs;
-    });
-  } catch (err) {
-    console.error('Error checking for duplicate orders:', err);
-    return false;
-  }
-}
-
-// ============================================================================
-// Vercel Serverless Handler
-// ============================================================================
-
 export const config = {
   api: {
-    bodyParser: false, // Stripe needs the raw body for signature verification
-  },
+    bodyParser: false
+  }
 };
 
-/**
- * Reads the raw request body as a Buffer.
- * Required for Stripe webhook signature verification.
- */
-async function getRawBody(req) {
-  if (req.rawBody) {
-    return typeof req.rawBody === 'string' ? Buffer.from(req.rawBody) : req.rawBody;
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = "";
+
+    req.on("data", (chunk) => {
+      data += chunk.toString();
+    });
+
+    req.on("end", () => resolve(data));
+    req.on("error", reject);
+  });
+}
+
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  if (Buffer.isBuffer(req.body)) {
-    return req.body;
+  return result === 0;
+}
+
+function toHex(buffer) {
+  return Array.from(new Uint8Array(buffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function verifyStripeSignature(rawBody, signature, secret) {
+  if (!signature || !secret) return false;
+
+  const parts = signature.split(",");
+  const timestampPart = parts.find((part) => part.startsWith("t="));
+  const signatureParts = parts
+    .filter((part) => part.startsWith("v1="))
+    .map((part) => part.slice(3));
+
+  if (!timestampPart || signatureParts.length === 0) return false;
+
+  const timestamp = timestampPart.slice(2);
+  const timestampNumber = Number(timestamp);
+
+  if (!Number.isFinite(timestampNumber)) return false;
+  if (Math.abs(Math.floor(Date.now() / 1000) - timestampNumber) > 300) {
+    return false;
   }
-  if (typeof req.body === 'string') {
-    return Buffer.from(req.body);
-  }
-  if (req.readable !== false) {
-    const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+
+  const signedPayload = `${timestamp}.${rawBody}`;
+  const encoder = new TextEncoder();
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const digest = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(signedPayload)
+  );
+
+  const expected = toHex(digest);
+
+  return signatureParts.some((candidate) =>
+    timingSafeEqual(candidate, expected)
+  );
+}
+
+function splitName(fullName) {
+  const name = (fullName || "Stripe Customer").trim();
+  const pieces = name.split(/\s+/);
+
+  return {
+    firstName: pieces.shift() || "Stripe",
+    lastName: pieces.join(" ") || "Customer"
+  };
+}
+
+function normalizeAddress(address, fallbackName, fallbackPhone) {
+  if (!address) return undefined;
+
+  const name = splitName(fallbackName);
+
+  return {
+    firstName: name.firstName,
+    lastName: name.lastName,
+    address1: address.line1 || "",
+    address2: address.line2 || undefined,
+    city: address.city || "",
+    province: address.state || undefined,
+    country: address.country || "",
+    zip: address.postal_code || "",
+    phone: address.phone || fallbackPhone || undefined
+  };
+}
+
+async function getStripeLineItems(sessionId, secret) {
+  const response = await fetch(
+    `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}/line_items?limit=100`,
+    {
+      headers: {
+        Authorization: `Bearer ${secret}`
+      }
     }
-    if (chunks.length > 0) {
-      return Buffer.concat(chunks);
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      `Stripe line item lookup failed: ${data?.error?.message || "Unknown error"}`
+    );
+  }
+
+  return data.data || [];
+}
+
+async function getShopifyAccessToken(shop, clientId, clientSecret) {
+  const response = await fetch(
+    `https://${shop}.myshopify.com/admin/oauth/access_token`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: clientId,
+        client_secret: clientSecret
+      })
     }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok || !data.access_token) {
+    throw new Error(
+      `Shopify authentication failed: ${JSON.stringify(data)}`
+    );
   }
-  if (req.body && typeof req.body === 'object') {
-    return Buffer.from(JSON.stringify(req.body));
-  }
-  return Buffer.from('');
+
+  return data.access_token;
 }
 
 export default async function handler(req, res) {
-  // Only accept POST requests
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // Verify required environment variables
-  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    console.error('Missing Stripe environment variables');
-    return res.status(500).json({ error: 'Server configuration error' });
-  }
-  if (!process.env.SHOPIFY_STORE_DOMAIN || !process.env.SHOPIFY_ADMIN_ACCESS_TOKEN) {
-    console.error('Missing Shopify environment variables');
-    return res.status(500).json({ error: 'Server configuration error' });
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      success: false,
+      error: "Method not allowed"
+    });
   }
 
   try {
-    // 1. Read the raw body for signature verification
-    const rawBody = await getRawBody(req);
-    const signature = req.headers['stripe-signature'];
+    const stripeSecret = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const shop = process.env.SHOPIFY_SHOP;
+    const clientId = process.env.SHOPIFY_CLIENT_ID;
+    const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
+    const variantId = process.env.SHOPIFY_VARIANT_ID;
 
-    if (!signature) {
-      return res.status(400).json({ error: 'Missing stripe-signature header' });
+    if (
+      !stripeSecret ||
+      !webhookSecret ||
+      !shop ||
+      !clientId ||
+      !clientSecret ||
+      !variantId
+    ) {
+      return res.status(500).json({
+        success: false,
+        error: "Missing required environment variables"
+      });
     }
 
-    // 2. Verify the webhook signature
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(
-        rawBody,
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      return res.status(400).json({ error: `Webhook signature error: ${err.message}` });
+    const rawBody = await readRawBody(req);
+    const signature = req.headers["stripe-signature"];
+
+    const validSignature = await verifyStripeSignature(
+      rawBody,
+      signature,
+      webhookSecret
+    );
+
+    if (!validSignature) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid Stripe webhook signature"
+      });
     }
 
-    // 3. Handle the checkout.session.completed event
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
+    const event = JSON.parse(rawBody);
 
-      console.log('Processing checkout.session.completed:', session.id);
+    if (event.type !== "checkout.session.completed") {
+      return res.status(200).json({
+        received: true,
+        ignored: true,
+        eventType: event.type
+      });
+    }
 
-      // 4. Check for duplicate orders (idempotency)
-      const isDuplicate = await checkDuplicateOrder(session.id);
-      if (isDuplicate) {
-        console.log('Duplicate order detected, skipping:', session.id);
-        return res.status(200).json({ received: true, status: 'duplicate_skipped' });
+    const session = event.data?.object;
+
+    if (!session?.id) {
+      return res.status(400).json({
+        success: false,
+        error: "Stripe Checkout session is missing"
+      });
+    }
+
+    if (session.payment_status !== "paid") {
+      return res.status(200).json({
+        received: true,
+        ignored: true,
+        reason: "Stripe payment is not marked paid",
+        paymentStatus: session.payment_status
+      });
+    }
+
+    const amount = Number(session.amount_total || 0) / 100;
+    const currency = String(session.currency || "usd").toUpperCase();
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Stripe session has no positive total amount"
+      });
+    }
+
+    const customerDetails = session.customer_details || {};
+    const customerName = customerDetails.name || "Stripe Customer";
+    const customerEmail =
+      customerDetails.email ||
+      session.customer_email ||
+      "stripe-customer@example.com";
+    const customerPhone = customerDetails.phone || undefined;
+
+    const name = splitName(customerName);
+
+    const shipping = session.shipping_details?.address
+      ? normalizeAddress(
+          session.shipping_details.address,
+          session.shipping_details.name || customerName,
+          customerPhone
+        )
+      : undefined;
+
+    const billing = customerDetails.address
+      ? normalizeAddress(customerDetails.address, customerName, customerPhone)
+      : undefined;
+
+    const stripeItems = await getStripeLineItems(session.id, stripeSecret);
+
+    if (stripeItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Stripe Checkout session has no line items"
+      });
+    }
+
+    const lineItems = stripeItems.map((item) => ({
+      variantId,
+      quantity: Number(item.quantity || 1)
+    }));
+
+    const accessToken = await getShopifyAccessToken(
+      shop,
+      clientId,
+      clientSecret
+    );
+
+    const mutation = `
+      mutation orderCreate($order: OrderCreateOrderInput!) {
+        orderCreate(order: $order) {
+          userErrors {
+            field
+            message
+          }
+          order {
+            id
+            name
+            displayFinancialStatus
+            displayFulfillmentStatus
+            email
+            phone
+            totalPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+            subtotalPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+            transactions {
+              id
+              kind
+              status
+              test
+              gateway
+              amountSet {
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+            lineItems(first: 100) {
+              nodes {
+                title
+                quantity
+                variant {
+                  id
+                }
+              }
+            }
+          }
+        }
       }
+    `;
 
-      // 5. Create the order in Shopify
-      await createShopifyOrder(session);
+    const order = {
+      lineItems,
+      email: customerEmail,
+      phone: customerPhone,
+      customer: {
+        toUpsert: {
+          email: customerEmail,
+          firstName: name.firstName,
+          lastName: name.lastName,
+          phone: customerPhone
+        }
+      },
+      financialStatus: "PAID",
+      transactions: [
+        {
+          kind: "SALE",
+          status: "SUCCESS",
+          gateway: "Stripe",
+          test: true,
+          amountSet: {
+            shopMoney: {
+              amount: amount.toFixed(2),
+              currencyCode: currency
+            }
+          }
+        }
+      ]
+    };
 
-      console.log('Order synced to Shopify successfully for session:', session.id);
-      return res.status(200).json({ received: true, status: 'order_created' });
+    if (shipping) {
+      order.shippingAddress = shipping;
     }
 
-    // For other event types, acknowledge receipt
-    console.log('Unhandled event type:', event.type);
-    return res.status(200).json({ received: true, status: 'event_ignored' });
-  } catch (err) {
-    console.error('Webhook handler error:', err);
-    // Return 200 to prevent Stripe from retrying on app errors
-    // (retries would create duplicate orders)
-    return res.status(200).json({ received: true, status: 'error', message: err.message });
+    if (billing) {
+      order.billingAddress = billing;
+    }
+
+    const shopifyResponse = await fetch(
+      `https://${shop}.myshopify.com/admin/api/2026-10/graphql.json`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": accessToken
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: { order }
+        })
+      }
+    );
+
+    const shopifyData = await shopifyResponse.json();
+
+    if (!shopifyResponse.ok || shopifyData.errors) {
+      console.error("Shopify GraphQL error:", shopifyData);
+      return res.status(500).json({
+        success: false,
+        error: "Shopify order creation request failed",
+        details: shopifyData
+      });
+    }
+
+    const result = shopifyData.data?.orderCreate;
+
+    if (result?.userErrors?.length) {
+      console.error("Shopify orderCreate user errors:", result.userErrors);
+      return res.status(400).json({
+        success: false,
+        error: "Shopify rejected the order",
+        details: result.userErrors
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Stripe TEST payment received and Shopify order created",
+      stripe: {
+        eventId: event.id,
+        sessionId: session.id,
+        amount,
+        currency,
+        customerName,
+        customerEmail,
+        shippingAddressCollected: Boolean(shipping),
+        billingAddressCollected: Boolean(billing)
+      },
+      shopify: result.order
+    });
+  } catch (error) {
+    console.error("Stripe webhook error:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 }
