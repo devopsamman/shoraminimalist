@@ -166,15 +166,16 @@ export default async function handler(req, res) {
     const shop = process.env.SHOPIFY_SHOP;
     const clientId = process.env.SHOPIFY_CLIENT_ID;
     const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
-    const variantId = process.env.SHOPIFY_VARIANT_ID;
+    const variantId =
+      process.env.SHOPIFY_VARIANT_ID ||
+      "gid://shopify/ProductVariant/54550012395838";
 
     if (
       !stripeSecret ||
       !webhookSecret ||
       !shop ||
       !clientId ||
-      !clientSecret ||
-      !variantId
+      !clientSecret
     ) {
       return res.status(500).json({
         success: false,
@@ -349,7 +350,7 @@ export default async function handler(req, res) {
           kind: "SALE",
           status: "SUCCESS",
           gateway: "Stripe",
-          test: true,
+          test: false,
           amountSet: {
             shopMoney: {
               amount: amount.toFixed(2),
@@ -407,7 +408,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: "Stripe TEST payment received and Shopify order created",
+      message: "Stripe payment received and Shopify order created",
       stripe: {
         eventId: event.id,
         sessionId: session.id,
