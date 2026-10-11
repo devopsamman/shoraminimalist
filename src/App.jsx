@@ -1,4 +1,35 @@
 import { useState, useEffect } from 'react'
+import PolicyView from './components/PolicyView'
+
+function getPolicyFromPath(pathname, search, hash) {
+  const cleanPath = (pathname || '').toLowerCase().replace(/^\/+|\/+$/g, '')
+  const params = new URLSearchParams(search || '')
+  const policyParam = params.get('policy') || params.get('page')
+  const hashVal = (hash || '').replace(/^#\/?/, '').toLowerCase()
+
+  const check = policyParam || cleanPath || hashVal
+  if (!check) return null
+
+  if (['refund-policy', 'return-and-refund', 'refunds', 'returns'].includes(check)) {
+    return 'refund-policy'
+  }
+  if (['terms-of-service', 'terms-and-conditions', 'terms', 'tos'].includes(check)) {
+    return 'terms-of-service'
+  }
+  if (['privacy-policy', 'privacy', 'gdpr'].includes(check)) {
+    return 'privacy-policy'
+  }
+  if (['shipping-policy', 'digital-delivery', 'delivery-policy', 'delivery', 'shipping'].includes(check)) {
+    return 'shipping-policy'
+  }
+  if (['cookie-policy', 'cookies'].includes(check)) {
+    return 'cookie-policy'
+  }
+  if (['contact', 'contact-us', 'support'].includes(check)) {
+    return 'contact'
+  }
+  return null
+}
 import { 
   Star, 
   ChevronRight, 
@@ -12,7 +43,6 @@ import {
   Smile, 
   Heart, 
   Sparkles,
-  HelpCircle,
   Menu,
   X
 } from 'lucide-react'
@@ -288,6 +318,54 @@ const HERO_TESTIMONIALS = {
 }
 
 function App() {
+  // --- Policy & View Routing States ---
+  const [currentView, setCurrentView] = useState(() => {
+    const matched = getPolicyFromPath(window.location.pathname, window.location.search, window.location.hash)
+    return matched ? 'policy' : 'store'
+  })
+  const [activePolicyId, setActivePolicyId] = useState(() => {
+    const matched = getPolicyFromPath(window.location.pathname, window.location.search, window.location.hash)
+    return matched || 'refund-policy'
+  })
+
+  // Listen for browser back / forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const matched = getPolicyFromPath(window.location.pathname, window.location.search, window.location.hash)
+      if (matched) {
+        setCurrentView('policy')
+        setActivePolicyId(matched)
+      } else {
+        setCurrentView('store')
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const openPolicy = (policyId, e) => {
+    if (e && e.preventDefault) e.preventDefault()
+    setActivePolicyId(policyId)
+    setCurrentView('policy')
+    const urlMap = {
+      'refund-policy': '/return-and-refund',
+      'terms-of-service': '/terms-of-service',
+      'privacy-policy': '/privacy-policy',
+      'shipping-policy': '/shipping-policy',
+      'cookie-policy': '/cookie-policy',
+      'contact': '/contact'
+    }
+    const path = urlMap[policyId] || `/${policyId}`
+    window.history.pushState({ path }, '', path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const backToStore = () => {
+    setCurrentView('store')
+    window.history.pushState({}, '', '/')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // --- States ---
   const [activeProductId, setActiveProductId] = useState('cleaning-planner')
   const activeProduct = PRODUCTS[activeProductId]
@@ -344,12 +422,37 @@ function App() {
 
   // Dynamic Browser Title and Meta description
   useEffect(() => {
-    document.title = `${activeProduct.name} | Shoraminimalist`
-    const metaDesc = document.querySelector('meta[name="description"]')
-    if (metaDesc) {
-      metaDesc.setAttribute('content', activeProduct.tagline)
+    if (currentView === 'store') {
+      document.title = `${activeProduct.name} | Shoraminimalist`
+      const metaDesc = document.querySelector('meta[name="description"]')
+      if (metaDesc) {
+        metaDesc.setAttribute('content', activeProduct.tagline)
+      }
     }
-  }, [activeProduct])
+  }, [activeProduct, currentView])
+
+  // If user navigated to a legal policy, render the comprehensive PolicyView
+  if (currentView === 'policy') {
+    return (
+      <PolicyView
+        activePolicyId={activePolicyId}
+        onSelectPolicy={(id) => {
+          setActivePolicyId(id)
+          const urlMap = {
+            'refund-policy': '/return-and-refund',
+            'terms-of-service': '/terms-of-service',
+            'privacy-policy': '/privacy-policy',
+            'shipping-policy': '/shipping-policy',
+            'cookie-policy': '/cookie-policy',
+            'contact': '/contact'
+          }
+          const path = urlMap[id] || `/${id}`
+          window.history.pushState({ path }, '', path)
+        }}
+        onBackToStore={backToStore}
+      />
+    )
+  }
 
   // Product Gallery
   const [activeGalleryIdx, setActiveGalleryIdx] = useState(0)
@@ -460,6 +563,13 @@ function App() {
             >
               Healthy Food Swaps
             </button>
+            <button
+              onClick={(e) => openPolicy('refund-policy', e)}
+              className="text-xs tracking-wider uppercase font-bold text-zinc-400 hover:text-zinc-600 transition-colors py-0.5 border-b-2 border-transparent"
+              title="UK Legal Policies & Consumer Rights"
+            >
+              UK Policies
+            </button>
           </div>
 
           {/* Mobile Menu Icon */}
@@ -534,6 +644,16 @@ function App() {
                 >
                   Get Template
                 </a>
+
+                <div className="pt-6 mt-4 border-t border-zinc-100 flex flex-col gap-3 text-xs font-semibold text-zinc-500">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">UK Legal & Policies</span>
+                  <button onClick={(e) => { setMobileMenuOpen(false); openPolicy('refund-policy', e); }} className="text-left hover:text-brand-dark">Refund & Return Policy</button>
+                  <button onClick={(e) => { setMobileMenuOpen(false); openPolicy('terms-of-service', e); }} className="text-left hover:text-brand-dark">Terms of Service</button>
+                  <button onClick={(e) => { setMobileMenuOpen(false); openPolicy('privacy-policy', e); }} className="text-left hover:text-brand-dark">Privacy Policy (UK GDPR)</button>
+                  <button onClick={(e) => { setMobileMenuOpen(false); openPolicy('shipping-policy', e); }} className="text-left hover:text-brand-dark">Digital Delivery Policy</button>
+                  <button onClick={(e) => { setMobileMenuOpen(false); openPolicy('cookie-policy', e); }} className="text-left hover:text-brand-dark">Cookie Policy</button>
+                  <button onClick={(e) => { setMobileMenuOpen(false); openPolicy('contact', e); }} className="text-left hover:text-brand-dark">Contact Us</button>
+                </div>
               </nav>
             </div>
           </div>
@@ -1212,8 +1332,8 @@ function App() {
 
           {/* Links Row */}
           <div className="flex gap-8 justify-center text-xs font-bold text-zinc-500 uppercase tracking-widest mb-16">
-            <span>Satisfaction Guaranteed</span>
-            <span>Instant Download</span>
+            <button onClick={(e) => openPolicy('refund-policy', e)} className="hover:text-brand-dark hover:underline transition cursor-pointer">Satisfaction Guaranteed</button>
+            <button onClick={(e) => openPolicy('shipping-policy', e)} className="hover:text-brand-dark hover:underline transition cursor-pointer">Instant Download</button>
           </div>
 
         </div>
@@ -1233,12 +1353,13 @@ function App() {
           </div>
 
           {/* Navigation Links */}
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-8 text-xs md:text-sm font-semibold text-zinc-500">
-            <a href="#" className="hover:opacity-80 transition">Contact Us</a>
-            <a href="#" className="hover:opacity-80 transition">Privacy Policy</a>
-            <a href="#" className="hover:opacity-80 transition">Return and Refund</a>
-            <a href="#" className="hover:opacity-80 transition">Shipping Policy</a>
-            <a href="#" className="hover:opacity-80 transition">Terms of Service</a>
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10 mb-8 text-xs md:text-sm font-semibold text-zinc-500">
+            <button onClick={(e) => openPolicy('contact', e)} className="hover:text-brand-dark transition cursor-pointer">Contact Us</button>
+            <button onClick={(e) => openPolicy('privacy-policy', e)} className="hover:text-brand-dark transition cursor-pointer">Privacy Policy</button>
+            <button onClick={(e) => openPolicy('refund-policy', e)} className="hover:text-brand-dark transition cursor-pointer">Return and Refund</button>
+            <button onClick={(e) => openPolicy('shipping-policy', e)} className="hover:text-brand-dark transition cursor-pointer">Shipping Policy</button>
+            <button onClick={(e) => openPolicy('terms-of-service', e)} className="hover:text-brand-dark transition cursor-pointer">Terms of Service</button>
+            <button onClick={(e) => openPolicy('cookie-policy', e)} className="hover:text-brand-dark transition cursor-pointer">Cookie Policy</button>
           </div>
 
           {/* Powered by Page */}
