@@ -44,7 +44,13 @@ import {
   Heart, 
   Sparkles,
   Menu,
-  X
+  X,
+  Wallet,
+  ChartColumn,
+  PiggyBank,
+  Monitor,
+  BadgeCheck,
+  LifeBuoy
 } from 'lucide-react'
 
 const ICON_MAP = {
@@ -54,140 +60,159 @@ const ICON_MAP = {
   'smile': Smile,
   'heart': Heart,
   'sparkles': Sparkles,
-  'check': Check
+  'check': Check,
+  'wallet': Wallet,
+  'chart': ChartColumn,
+  'piggy-bank': PiggyBank,
+  'monitor': Monitor,
+  'badge-check': BadgeCheck,
+  'life-buoy': LifeBuoy
 }
 
 const PRODUCTS = {
-  'cleaning-planner': {
-    id: 'cleaning-planner',
-    name: 'ADHD-Friendly Daily Cleaning Planner',
-    shortName: 'ADHD Planner',
-    tagline: 'Conquer your cleaning routine effortlessly. The ultimate ADHD-friendly daily cleaning planner featuring visual guides, manageable check-offs, and room-by-room deep clean pages.',
-    price: 29.99,
-    originalPrice: 49.99,
-    announcement: 'Simplify daily cleaning with our planner',
-    stripeUrl: 'https://buy.stripe.com/4gMeVd0iy6w8esB73K63K00',
-    category: 'ADHD PLANNER',
+  'excel-template': {
+    id: 'excel-template',
+    name: 'Excel Templates Bundle – 1000+ Finance, Business, Budget & Analytics Dashboards',
+    shortName: 'Shora Excel Template',
+    menuLabel: 'Shora Excel Template',
+    tagline: 'Track your finances effortlessly, visualize budgets with clarity, and make informed business decisions. 1000+ ready-to-use finance and business dashboards for Windows and Mac, with master resell rights and full support.',
+    price: 499,
+    originalPrice: 1999,
+    currency: 'INR',
+    announcement: 'Unlock Success with 1000+ Excel Templates',
+    // Checkout link for this product. Swap in a Stripe payment link here when you have one.
+    checkoutUrl: 'https://256aa1470f66.myxpage.shop/landing-page/exceltemplatesbundle-en-MTc5Mzk2ODAwNjE2ODM1NDUyNA==',
+    category: 'EXCEL TEMPLATE',
     theme: {
-      accent: '#007bff', // brand-blue
-      accentHover: '#0056b3', // brand-blue-dark
-      bgGradient: 'from-[#a5cbff] to-[#b6d6ff]',
-      lightBg: 'bg-blue-50',
-      badgeBg: 'bg-brand-blue/15 text-brand-blue',
-      btnBg: 'bg-brand-blue hover:bg-brand-blue-dark',
-      accentText: 'text-brand-blue',
-      borderAccent: 'border-brand-blue',
-      textAccentHover: 'hover:text-brand-blue-dark hover:border-brand-blue-dark',
-      statsBgGradient: 'from-[#74a4f8] to-[#b6d6ff]'
+      accent: '#2E7D32', // brand-excel
+      accentHover: '#1B5E20', // brand-excel-dark
+      bgGradient: 'from-[#C8E6C9] to-[#A5D6A7]',
+      heroGlow: 'from-green-100 to-lime-100',
+      lightBg: 'bg-green-50',
+      badgeBg: 'bg-brand-excel/15 text-brand-excel',
+      btnBg: 'bg-brand-excel hover:bg-brand-excel-dark',
+      accentText: 'text-brand-excel',
+      borderAccent: 'border-brand-excel',
+      textAccentHover: 'hover:text-brand-excel-dark hover:border-brand-excel-dark',
+      statsBgGradient: 'from-[#4CAF50] to-[#C8E6C9]'
     },
-    heroImage: '/Assets/shora images02.jpeg',
+    heroImage: '/Assets/excel-template/01-1000-excel-templates.jpg',
     galleryImages: [
-      "/Assets/shora images13.png", // Main Infographic
-      "/Assets/shora images02.jpeg", // Cover Mockup
-      "/Assets/shora images11.jpeg", // Features Mockup
-      "/Assets/shora images12.jpeg", // Dimensions Mockup
-      "/Assets/shora images14.jpeg", // Weekly spread
-      "/Assets/shora images17.jpeg", // Lifestyle
-      "/Assets/shora images18.jpeg", // Deep clean
-      "/Assets/shora images15.jpeg"  // Guides List
+      '/Assets/excel-template/01-1000-excel-templates.jpg',
+      '/Assets/excel-template/02-whats-included.jpg',
+      '/Assets/excel-template/03-why-youll-love-it.jpg',
+      '/Assets/excel-template/04-perfect-for.jpg',
+      '/Assets/excel-template/05-how-it-works.jpg',
+      '/Assets/excel-template/06-budget-planning.jpg',
+      '/Assets/excel-template/07-top-categories.jpg',
+      '/Assets/excel-template/08-work-smarter.jpg'
     ],
     features: [
-      { title: "ADHD Friendly", desc: "Enjoy an ADHD-friendly layout designed for clarity and focus.", icon: 'brain' },
-      { title: "Manageable Tasks", desc: "Break down cleaning into small, achievable tasks that feel manageable.", icon: 'check-square' },
-      { title: "Motivating Environment", desc: "A motivating and judgment-free space to build consistent habits.", icon: 'compass' },
-      { title: "Daily Check-Off", desc: "Easily track your progress with a simple daily check-off system.", icon: 'smile' },
-      { title: "Stress-Free Cleaning", desc: "Transform your cleaning routine into a stress-free experience.", icon: 'heart' },
-      { title: "Consistent Cleanliness", desc: "Achieve a consistently clean home without feeling overwhelmed.", icon: 'sparkles' },
+      { title: "Financial Tracking", desc: "Easily track your finances with intuitive dashboards that simplify budgeting and expense management.", icon: 'wallet' },
+      { title: "Smart Analytics", desc: "Gain insights with powerful analytics that help you make smarter business decisions quickly and confidently.", icon: 'chart' },
+      { title: "Budget Management", desc: "Manage budgets effortlessly with tools designed to optimize spending and maximize savings every month.", icon: 'piggy-bank' },
+      { title: "Cross-Platform", desc: "Compatible with both Windows and Mac, ensuring seamless integration into your existing workflow.", icon: 'monitor' },
+      { title: "Master Resell Rights", desc: "All templates come with Master Resell Rights, allowing you to resell them legally.", icon: 'badge-check' },
+      { title: "Full Support", desc: "Support and detailed documentation are included to help you set up and use the templates effectively.", icon: 'life-buoy' },
     ],
     tabContents: {
-      tasks: {
-        tabLabel: "Simple Tasks",
-        title: "Designed for You",
-        body1: "Designed with ADHD in mind, our planner uses a clear, visual structure to guide you through cleaning. Small, achievable steps build momentum and prevent task paralysis.",
-        body2: "The planner's strength lies in its simplicity and motivational design. Enjoy a judgment-free zone that celebrates progress, making daily cleaning a sustainable and rewarding habit.",
-        image: "/Assets/shora images12.jpeg"
+      templates: {
+        tabLabel: "1000+ Templates",
+        title: "1000+ Ready-to-Use Templates",
+        body1: "Our finance and business dashboard templates transform complex data into clear, actionable insights, empowering you to make confident decisions effortlessly.",
+        body2: "Business, finance, budget and analytics dashboards in one bundle, provided in .xlsx format and compatible with most spreadsheet software.",
+        image: '/Assets/excel-template/02-whats-included.jpg'
       },
-      adhd: {
-        tabLabel: "ADHD Friendly",
-        title: "ADHD-Friendly Layout",
-        body1: "Our layout breaks tasks down to their absolute simplest form. No long-winded checklists or overwhelming daily schedules that lead to mental fatigue.",
-        body2: "By presenting tasks in structured columns with visual spacing, your brain can easily focus on one single step at a time, resulting in immediate progress.",
-        image: "/Assets/shora images16.jpeg"
+      platform: {
+        tabLabel: "Windows & Mac",
+        title: "Built for Windows and Mac",
+        body1: "Designed for both Windows and Mac, these templates streamline your budgeting and analytics, saving time and reducing errors in your financial planning.",
+        body2: "Open the Excel file, input your business data into the designated fields, and start generating insightful analytics immediately.",
+        image: '/Assets/excel-template/03-why-youll-love-it.jpg'
       },
-      motivating: {
-        tabLabel: "Motivating",
-        title: "Motivating & Rewarding",
-        body1: "Get the immediate hit of satisfaction and dopamine with our clean, visual check-off circles. Checking items off triggers a feeling of achievement.",
-        body2: "We keep the focus on building small daily consistency. Over time, these small actions compound into a beautifully kept home and a clear, quiet mind.",
-        image: "/Assets/shora images18.jpeg"
+      support: {
+        tabLabel: "Resell Rights & Support",
+        title: "Master Resell Rights & Full Support",
+        body1: "With master resell rights and comprehensive support, you gain not just tools but a trusted partner in achieving your business goals smoothly.",
+        body2: "Support and detailed documentation are provided to help you set up and use the templates effectively.",
+        image: '/Assets/excel-template/05-how-it-works.jpg'
       }
     },
     collageImages: [
-      "/Assets/shora images14.jpeg",
-      "/Assets/shora images17.jpeg",
-      "/Assets/shora images18.jpeg",
-      "/Assets/shora images15.jpeg"
+      '/Assets/excel-template/04-perfect-for.jpg',
+      '/Assets/excel-template/06-budget-planning.jpg',
+      '/Assets/excel-template/07-top-categories.jpg',
+      '/Assets/excel-template/08-work-smarter.jpg'
     ],
     testimonials: [
-      { title: "LIFE CHANGER", text: "This planner finally quieted the noise in my brain. Cleaning is no longer overwhelming, it feels manageable, peaceful, and truly life-changing now.", rating: 5, author: "IH", sub: "Verified purchaser" },
-      { title: "BRAIN CLARITY", text: "Finally, a system that works with my ADHD brain. I feel so much lighter and calmer now that my home stays tidy.", rating: 5, author: "VC", sub: "Verified purchaser" },
-      { title: "ABSOLUTE PEACE", text: "I used to be paralyzed by chores, but this planner helps me focus. My living space is finally the sanctuary I needed.", rating: 5, author: "BR", sub: "Verified purchaser" },
-      { title: "EMPOWERED DAILY", text: "The judgment-free approach helped me build consistent habits. I finally feel in control of my home and my own daily routine.", rating: 5, author: "VC", sub: "Verified purchaser" },
-      { title: "TOTAL RELIEF", text: "I struggled with cleaning for years until I found this. It breaks tasks into tiny steps that actually keep my home organized.", rating: 5, author: "VC", sub: "Verified purchaser" },
-      { title: "FINALLY ORGANIZED", text: "This has been a complete game changer for my mental health. Cleaning feels simple, achievable, and I no longer feel any shame.", rating: 5, author: "GR", sub: "Verified purchaser" },
-      { title: "SIMPLY WONDERFUL", text: "Such a thoughtful tool for anyone with ADHD. It makes daily tasks feel small and rewarding instead of a huge, scary mountain.", rating: 5, author: "LM", sub: "Verified purchaser" },
-      { title: "DEEPLY GRATEFUL", text: "I am so grateful for this planner. It turned my chaotic home into a peaceful space where I can finally relax today.", rating: 5, author: "MJ", sub: "Verified purchaser" }
+      { title: "TIME-SAVING AND EFFICIENT", text: "These finance templates saved me hours by automating budgeting and expense tracking seamlessly.", rating: 5, author: "Jessica", sub: "Verified buyer" },
+      { title: "CLEAR AND INSIGHTFUL VISUALS", text: "Business dashboards helped me visualize key metrics clearly, improving decision-making instantly.", rating: 5, author: "Marcus", sub: "Verified buyer" },
+      { title: "EASY TO CUSTOMIZE AND USE", text: "Budget templates are user-friendly and customizable, perfect for managing my personal finances easily.", rating: 5, author: "Sofia", sub: "Verified buyer" },
+      { title: "POWERFUL BUSINESS INSIGHTS", text: "Analytics dashboards provide deep insights that boosted my business performance significantly.", rating: 5, author: "Kenji", sub: "Verified buyer" }
     ],
     buyTabs: {
       how: {
-        title: "How It Works",
+        title: "How To Use",
         paragraphs: [
-          { bold: "How It Works", text: "Our planner guides you through small, achievable cleaning steps, making daily tidying a breeze for everyone." },
-          { bold: "What's Inside", text: "Designed with ADHD-friendly principles, featuring clear layouts and manageable tasks." },
-          { bold: "Design", text: "A clean, minimalist design that's easy on the eyes and simple to navigate." }
+          { bold: "Step 1", text: "Open the Excel file and familiarize yourself with the layout and available financial metrics." },
+          { bold: "Step 2", text: "Input your business data into the designated fields to start generating insightful analytics immediately." },
+          { bold: "Dashboard Optimization Tip", text: "Maximize efficiency by customizing your dashboard filters to focus on key financial metrics that matter most to your business goals." }
         ]
       },
       benefits: {
-        title: "Core Benefits",
+        title: "What's Included",
         paragraphs: [
-          { bold: "ADHD Focused", text: "Reduces mental friction, prevents task paralysis, and offers dopamine-friendly checklist boxes." },
-          { bold: "Durable & Reusable", text: "High-quality twin-wire binding, waterproof glossy laminated room pages, and thick 100gsm paper." },
-          { bold: "Visual Cues", text: "Organized by room-by-room deep clean lists that simplify chores into easy visual blocks." }
+          { bold: "Finance Dashboards", text: "Comprehensive finance dashboard for insights." },
+          { bold: "Budget & Analytics", text: "User-friendly budget tracking and analytics." },
+          { bold: "Windows & Mac", text: "Compatible with Windows and Mac systems." },
+          { bold: "Support", text: "Includes full support and documentation." }
         ]
       },
       why: {
         title: "Why You'll Love",
         paragraphs: [
-          { bold: "Zero Judgment", text: "Designed as a flexible, undated format. If you skip a day, you pick up without wasting pages or feeling guilty." },
-          { bold: "Clear Mind", text: "A tidy environment leads to a calmer mental state. This planner organizes the physical clutter to settle the brain noise." },
-          { bold: "Aesthetic Appeal", text: "Eco-Minimalist premium cover layouts that look beautiful sitting out on your desk or countertops." }
+          { bold: "Clear Insights", text: "Transform complex data into clear, actionable insights and make confident decisions effortlessly." },
+          { bold: "Fewer Errors", text: "Streamline your budgeting and analytics, saving time and reducing errors in your financial planning." },
+          { bold: "Resell Rights", text: "Master resell rights and comprehensive support included with every template." }
         ]
       }
     },
     faqs: [
-      { q: "Is this cleaning planner truly suitable for ADHD brains?", a: "Yes, absolutely! The planner was designed from the ground up with input from ADHD coaches and neurodivergent individuals. It focuses on reducing cognitive load by breaking down chores into micro-tasks, avoiding huge blocks of text, and using visual cues to maintain focus without leading to task paralysis." },
-      { q: "How often should I use this daily cleaning planner?", a: "It's designed for daily use, but with zero guilt! If you miss a day or even a week, you can pick up exactly where you left off. The undated format ensures that you never waste pages or feel bad about taking breaks." },
-      { q: "Will this planner work for my specific living situation?", a: "Yes! Whether you live in a compact studio apartment, a shared dorm room, or a large multi-family home, the room-by-room checklist and customizable sections allow you to adapt the planner to any layout." },
-      { q: "What happens if I miss a day of cleaning?", a: "Nothing! That's the beauty of our judgment-free system. The planner is designed to celebrate progress, not perfection. Simply skip that check-off or carry it over to the next day when you have the energy." },
-      { q: "How quickly can I access the digital cleaning planner?", a: "If you purchase the digital or hybrid package, you will receive an email with immediate access downloads within 2 minutes of checkout. You can print it at home or load it onto your tablet right away." }
+      { q: "How do I customize the finance templates?", a: "Our finance templates are easy to use and fully customizable to fit your business needs. Get started quickly with included support and documentation." },
+      { q: "Are these templates compatible with Windows and Mac?", a: "You can use these templates on both Windows and Mac platforms without any compatibility issues." },
+      { q: "Do these templates include resell rights?", a: "Yes, all templates come with Master Resell Rights, allowing you to resell them legally." },
+      { q: "Is support and documentation included?", a: "Support and detailed documentation are provided to help you set up and use the templates effectively." },
+      { q: "Can I track expenses with these templates?", a: "Our budget and analytics dashboards help you track expenses and analyze data efficiently." },
+      { q: "What file formats are the templates available in?", a: "Templates are provided in .xlsx format, compatible with most spreadsheet software." },
+      { q: "Who are these templates designed for?", a: "These templates are designed for business and finance professionals seeking efficient data management." },
+      { q: "Can I generate reports using these templates?", a: "You can quickly generate reports and insights to make informed financial decisions." }
     ],
-    guaranteeText: "Enjoy peace of mind with our ADHD Cleaning Planner; your satisfaction is our absolute top priority.",
-    guaranteeBox: "Your purchase is backed by our promise to make your daily cleaning routine simpler and more manageable."
+    stats: [
+      { value: "1000+", text: "Ready-to-use finance, business, budget and analytics templates in one bundle." },
+      { value: "MRR", text: "Master Resell Rights included, so you can legally resell every template." },
+      { value: "3,742", text: "Reviews from users who rate these templates as highly effective." }
+    ],
+    statsCaption: "Everything you need to manage budgets, track finances and analyze business data.",
+    guaranteeText: "Risk-free purchase with support and documentation included. Premium quality guaranteed.",
+    guaranteeBox: "Your purchase includes full support and detailed documentation to help you set up and use every template with confidence."
   },
   'food-swaps': {
     id: 'food-swaps',
     name: 'Done For You Guide on 30 Healthy Food Swaps – Editable Canva eBook Template',
     shortName: 'Healthy Food Swaps',
+    menuLabel: 'Healthy Food Swaps Guide',
     tagline: 'Save Time, Deliver Value, and Stand Out as the Go-To Health Coach. This editable Canva eBook template gives you everything you need to provide your audience with practical, real-world solutions to eat cleaner, lose weight, and stay on track.',
     price: 19.99,
     originalPrice: 39.99,
+    currency: 'USD',
     announcement: 'Done-for-you PLR digital product - Editable Canva template',
-    stripeUrl: 'https://buy.stripe.com/8x214nghw6w8cktgEk63K01',
+    checkoutUrl: 'https://buy.stripe.com/8x214nghw6w8cktgEk63K01',
     category: 'CANVA TEMPLATE',
     theme: {
       accent: '#009966', // brand-green
       accentHover: '#047857', // green-700
       bgGradient: 'from-[#a7f3d0] to-[#6ee7b7]',
+      heroGlow: 'from-emerald-100 to-teal-100',
       lightBg: 'bg-emerald-50',
       badgeBg: 'bg-emerald-100 text-emerald-800',
       btnBg: 'bg-brand-green hover:bg-emerald-700',
@@ -275,26 +300,46 @@ const PRODUCTS = {
       { q: "Is the nutrition copy already written?", a: "Yes, the template comes fully pre-written by a qualified nutritionist and personal trainer. It includes 30 practical, real-world healthy food swaps tailored for clean eating and weight loss." },
       { q: "Are the Instagram post templates included?", a: "Yes, you get a bonus bundle of 150+ Instagram Post templates matching the theme to help you promote the eBook, plus a Canva Mini Course Guide to help beginners." }
     ],
+    stats: [
+      { value: "100%", text: "Agreed that editable Canva designs saved them hours of content creation." },
+      { value: "97%", text: "Reported high client engagement when using this eBook as a coaching lead magnet." },
+      { value: "97%", text: "Found it simple to fully customize all colors, fonts, and layouts to match their brand." }
+    ],
+    statsCaption: "Results driven from wellness coaches using our done-for-you PLR template.",
     guaranteeText: "Your satisfaction is our top priority. Enjoy peace of mind with our Done For You Canva template eBook.",
     guaranteeBox: "We guarantee that our templates will save you hours of content creation time and deliver immediate high value to your audience."
   }
 }
 
+// Order of the products in the header menu. The first one is shown by default.
+const PRODUCT_ORDER = ['excel-template', 'food-swaps']
+const DEFAULT_PRODUCT_ID = PRODUCT_ORDER[0]
+
+function getProductFromSearch(search) {
+  const prod = new URLSearchParams(search || '').get('product')
+  return prod && PRODUCTS[prod] ? prod : DEFAULT_PRODUCT_ID
+}
+
+function formatPrice(amount, currency) {
+  const locale = currency === 'INR' ? 'en-IN' : 'en-US'
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount)
+}
+
 const HERO_TESTIMONIALS = {
-  'cleaning-planner': [
+  'excel-template': [
     {
-      text: "This planner is a game-changer for my ADHD! The small tasks make cleaning feel so much more manageable.",
-      author: "Sarah K.",
+      text: "This dashboard transformed how I manage my finances, making budgeting and analytics simple and effective every day.",
+      author: "James Carter",
       rating: 5
     },
     {
-      text: "Finally, a layout that works with my brain rather than fighting it. Clean lines, zero clutter.",
-      author: "David L.",
+      text: "Business dashboards helped me visualize key metrics clearly, improving decision-making instantly.",
+      author: "Marcus",
       rating: 5
     },
     {
-      text: "The room-by-room check-offs are perfect. It prevents my task paralysis every single morning.",
-      author: "Jess M.",
+      text: "Budget templates are user-friendly and customizable, perfect for managing my personal finances easily.",
+      author: "Sofia",
       rating: 5
     }
   ],
@@ -337,6 +382,7 @@ function App() {
         setActivePolicyId(matched)
       } else {
         setCurrentView('store')
+        setActiveProductId(getProductFromSearch(window.location.search))
       }
     }
     window.addEventListener('popstate', handlePopState)
@@ -367,7 +413,7 @@ function App() {
   }
 
   // --- States ---
-  const [activeProductId, setActiveProductId] = useState('cleaning-planner')
+  const [activeProductId, setActiveProductId] = useState(() => getProductFromSearch(window.location.search))
   const activeProduct = PRODUCTS[activeProductId]
   
   // Hero Testimonial Carousel
@@ -384,7 +430,7 @@ function App() {
   }, [activeProductId])
 
   // Interactive Tabs Section
-  const [activeTab, setActiveTab] = useState('tasks')
+  const [activeTab, setActiveTab] = useState(() => Object.keys(activeProduct.tabContents)[0])
 
   // Quantity Selector
   const [quantity, setQuantity] = useState(1)
@@ -402,15 +448,6 @@ function App() {
     
     setQuantity(1)
   }, [activeProductId])
-
-  // Sync with URL query parameter
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const prod = params.get('product')
-    if (prod && PRODUCTS[prod]) {
-      setActiveProductId(prod)
-    }
-  }, [])
 
   const handleProductChange = (prodId) => {
     if (PRODUCTS[prodId]) {
@@ -430,29 +467,6 @@ function App() {
       }
     }
   }, [activeProduct, currentView])
-
-  // If user navigated to a legal policy, render the comprehensive PolicyView
-  if (currentView === 'policy') {
-    return (
-      <PolicyView
-        activePolicyId={activePolicyId}
-        onSelectPolicy={(id) => {
-          setActivePolicyId(id)
-          const urlMap = {
-            'refund-policy': '/return-and-refund',
-            'terms-of-service': '/terms-of-service',
-            'privacy-policy': '/privacy-policy',
-            'shipping-policy': '/shipping-policy',
-            'cookie-policy': '/cookie-policy',
-            'contact': '/contact'
-          }
-          const path = urlMap[id] || `/${id}`
-          window.history.pushState({ path }, '', path)
-        }}
-        onBackToStore={backToStore}
-      />
-    )
-  }
 
   // Product Gallery
   const [activeGalleryIdx, setActiveGalleryIdx] = useState(0)
@@ -528,6 +542,29 @@ function App() {
 
   const currentTestimonials = HERO_TESTIMONIALS[activeProductId]
 
+  // If user navigated to a legal policy, render the comprehensive PolicyView
+  if (currentView === 'policy') {
+    return (
+      <PolicyView
+        activePolicyId={activePolicyId}
+        onSelectPolicy={(id) => {
+          setActivePolicyId(id)
+          const urlMap = {
+            'refund-policy': '/return-and-refund',
+            'terms-of-service': '/terms-of-service',
+            'privacy-policy': '/privacy-policy',
+            'shipping-policy': '/shipping-policy',
+            'cookie-policy': '/cookie-policy',
+            'contact': '/contact'
+          }
+          const path = urlMap[id] || `/${id}`
+          window.history.pushState({ path }, '', path)
+        }}
+        onBackToStore={backToStore}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white text-brand-dark flex flex-col font-sans select-none">
       
@@ -543,26 +580,19 @@ function App() {
           
           {/* Product Selector Links */}
           <div className="flex-1 hidden md:flex items-center gap-6">
-            <button
-              onClick={() => handleProductChange('cleaning-planner')}
-              className={`text-xs tracking-wider uppercase font-bold transition-all py-0.5 border-b-2 ${
-                activeProductId === 'cleaning-planner'
-                  ? 'text-brand-blue border-brand-blue'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-600'
-              }`}
-            >
-              ADHD Planner
-            </button>
-            <button
-              onClick={() => handleProductChange('food-swaps')}
-              className={`text-xs tracking-wider uppercase font-bold transition-all py-0.5 border-b-2 ${
-                activeProductId === 'food-swaps'
-                  ? 'text-brand-green border-brand-green'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-600'
-              }`}
-            >
-              Healthy Food Swaps
-            </button>
+            {PRODUCT_ORDER.map((prodId) => (
+              <button
+                key={prodId}
+                onClick={() => handleProductChange(prodId)}
+                className={`text-xs tracking-wider uppercase font-bold transition-all py-0.5 border-b-2 ${
+                  activeProductId === prodId
+                    ? `${PRODUCTS[prodId].theme.accentText} ${PRODUCTS[prodId].theme.borderAccent}`
+                    : 'text-zinc-400 border-transparent hover:text-zinc-600'
+                }`}
+              >
+                {PRODUCTS[prodId].shortName}
+              </button>
+            ))}
             <button
               onClick={(e) => openPolicy('refund-policy', e)}
               className="text-xs tracking-wider uppercase font-bold text-zinc-400 hover:text-zinc-600 transition-colors py-0.5 border-b-2 border-transparent"
@@ -625,18 +655,15 @@ function App() {
               </div>
               
               <nav className="flex flex-col gap-6 text-sm font-bold text-zinc-600">
-                <button
-                  onClick={() => { handleProductChange('cleaning-planner'); setMobileMenuOpen(false); }}
-                  className={`text-left py-2 border-b ${activeProductId === 'cleaning-planner' ? 'text-brand-blue border-brand-blue' : 'border-transparent'}`}
-                >
-                  ADHD Cleaning Planner
-                </button>
-                <button
-                  onClick={() => { handleProductChange('food-swaps'); setMobileMenuOpen(false); }}
-                  className={`text-left py-2 border-b ${activeProductId === 'food-swaps' ? 'text-brand-green border-brand-green' : 'border-transparent'}`}
-                >
-                  Healthy Food Swaps Guide
-                </button>
+                {PRODUCT_ORDER.map((prodId) => (
+                  <button
+                    key={prodId}
+                    onClick={() => { handleProductChange(prodId); setMobileMenuOpen(false); }}
+                    className={`text-left py-2 border-b ${activeProductId === prodId ? `${PRODUCTS[prodId].theme.accentText} ${PRODUCTS[prodId].theme.borderAccent}` : 'border-transparent'}`}
+                  >
+                    {PRODUCTS[prodId].menuLabel}
+                  </button>
+                ))}
                 <a
                   href="#buy-section"
                   onClick={(e) => { setMobileMenuOpen(false); scrollToBuy(e); }}
@@ -729,7 +756,7 @@ function App() {
           <div className="lg:col-span-6 flex justify-center items-center z-10 relative">
             <div className="relative w-full max-w-lg">
               {/* Outer decorative shadow shape */}
-              <div className={`absolute -inset-1 bg-gradient-to-r ${activeProductId === 'cleaning-planner' ? 'from-blue-100 to-indigo-100' : 'from-emerald-100 to-teal-100'} rounded-2xl blur-lg opacity-40`}></div>
+              <div className={`absolute -inset-1 bg-gradient-to-r ${activeProduct.theme.heroGlow} rounded-2xl blur-lg opacity-40`}></div>
               <img
                 src={activeProduct.heroImage}
                 alt={activeProduct.name}
@@ -817,7 +844,7 @@ function App() {
             How It Delivers High Value
           </h2>
           <p className="text-base text-zinc-500 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-            Explore the features and layout choices designed specifically to save you time and maximize clean results.
+            Explore the features and layout choices designed specifically to save you time and get results faster.
           </p>
 
           {/* Navigation Tabs */}
@@ -1045,10 +1072,10 @@ function App() {
                   className="text-3xl md:text-4xl font-extrabold"
                   style={{ color: activeProduct.theme.accent }}
                 >
-                  ${(activeProduct.price * quantity).toFixed(2)}
+                  {formatPrice(activeProduct.price * quantity, activeProduct.currency)}
                 </span>
                 <span className="text-base text-zinc-400 line-through">
-                  ${(activeProduct.originalPrice * quantity).toFixed(2)}
+                  {formatPrice(activeProduct.originalPrice * quantity, activeProduct.currency)}
                 </span>
                 <span 
                   className="px-2 py-0.5 text-xs font-black rounded-md uppercase tracking-wider"
@@ -1060,7 +1087,7 @@ function App() {
 
               {/* CTA Purchase Button */}
               <a
-                href={activeProduct.stripeUrl}
+                href={activeProduct.checkoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`w-full ${activeProduct.theme.btnBg} text-white font-bold text-lg px-8 py-4 rounded-md shadow-premium hover-lift mb-8 flex items-center justify-center transition-colors text-center`}
@@ -1122,50 +1149,24 @@ function App() {
           </span>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 mb-10 max-w-5xl mx-auto">
-            
-            {/* Stat Card 1 */}
-            <div className="bg-white rounded-2xl p-8 border border-zinc-100 shadow-lift tilted-card transform hover:scale-105 duration-300">
-              <span className="block text-4xl md:text-5xl font-black mb-4" style={{ color: activeProduct.theme.accent }}>
-                100%
-              </span>
-              <p className="text-sm font-semibold text-zinc-600 leading-relaxed">
-                {activeProductId === 'cleaning-planner' 
-                  ? "Said that it makes daily cleaning simple with an ADHD-friendly layout."
-                  : "Agreed that editable Canva designs saved them hours of content creation."}
-              </p>
-            </div>
-
-            {/* Stat Card 2 */}
-            <div className="bg-white rounded-2xl p-8 border border-zinc-100 shadow-lift transform hover:scale-105 duration-300">
-              <span className="block text-4xl md:text-5xl font-black mb-4" style={{ color: activeProduct.theme.accent }}>
-                97%
-              </span>
-              <p className="text-sm font-semibold text-zinc-600 leading-relaxed">
-                {activeProductId === 'cleaning-planner'
-                  ? "Said that it breaks down cleaning into small, manageable tasks for ease."
-                  : "Reported high client engagement when using this eBook as a coaching lead magnet."}
-              </p>
-            </div>
-
-            {/* Stat Card 3 */}
-            <div className="bg-white rounded-2xl p-8 border border-zinc-100 shadow-lift tilted-card transform hover:scale-105 duration-300">
-              <span className="block text-4xl md:text-5xl font-black mb-4" style={{ color: activeProduct.theme.accent }}>
-                97%
-              </span>
-              <p className="text-sm font-semibold text-zinc-600 leading-relaxed">
-                {activeProductId === 'cleaning-planner'
-                  ? "Said that it offers a motivating and judgment-free planner experience."
-                  : "Found it simple to fully customize all colors, fonts, and layouts to match their brand."}
-              </p>
-            </div>
-
+            {activeProduct.stats.map((stat, idx) => (
+              <div
+                key={idx}
+                className={`bg-white rounded-2xl p-8 border border-zinc-100 shadow-lift ${idx % 2 === 0 ? 'tilted-card ' : ''}transform hover:scale-105 duration-300`}
+              >
+                <span className="block text-4xl md:text-5xl font-black mb-4" style={{ color: activeProduct.theme.accent }}>
+                  {stat.value}
+                </span>
+                <p className="text-sm font-semibold text-zinc-600 leading-relaxed">
+                  {stat.text}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* Bottom citation */}
           <span className="text-xs md:text-sm text-white/80 font-medium tracking-wide">
-            {activeProductId === 'cleaning-planner'
-              ? "Results driven from user feedback on daily cleaning simplicity."
-              : "Results driven from wellness coaches using our done-for-you PLR template."}
+            {activeProduct.statsCaption}
           </span>
 
         </div>

@@ -6,7 +6,7 @@ export default function PolicyContactForm() {
     name: '',
     email: '',
     orderId: '',
-    product: 'ADHD-Friendly Daily Cleaning Planner',
+    product: 'Excel Templates Bundle',
     subject: 'General Question',
     message: ''
   })
@@ -53,7 +53,7 @@ export default function PolicyContactForm() {
                 name: '',
                 email: '',
                 orderId: '',
-                product: 'ADHD-Friendly Daily Cleaning Planner',
+                product: 'Excel Templates Bundle',
                 subject: 'General Question',
                 message: ''
               })
@@ -146,7 +146,7 @@ export default function PolicyContactForm() {
             onChange={handleChange}
             className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-zinc-200 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 outline-none bg-white transition"
           >
-            <option value="ADHD-Friendly Daily Cleaning Planner">ADHD Cleaning Planner</option>
+            <option value="Excel Templates Bundle">Shora Excel Template</option>
             <option value="Done For You Guide on 30 Healthy Food Swaps">30 Healthy Food Swaps Guide</option>
             <option value="General Inquiry">General / Other Inquiries</option>
           </select>

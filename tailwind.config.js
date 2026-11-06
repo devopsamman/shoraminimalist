@@ -19,6 +19,8 @@ export default {
           'sky-bg': '#b3d4ff',
           'stat-bg': '#599fff',
           green: '#009966',
+          excel: '#2E7D32',
+          'excel-dark': '#1B5E20',
           peach: '#f3e0e6',
           'peach-light': '#ffe4e6',
           'peach-text': '#991b1b',
