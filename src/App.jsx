@@ -80,8 +80,7 @@ const PRODUCTS = {
     originalPrice: 1999,
     currency: 'INR',
     announcement: 'Unlock Success with 1000+ Excel Templates',
-    // Checkout link for this product. Swap in a Stripe payment link here when you have one.
-    checkoutUrl: 'https://256aa1470f66.myxpage.shop/landing-page/exceltemplatesbundle-en-MTc5Mzk2ODAwNjE2ODM1NDUyNA==',
+    checkoutUrl: 'https://buy.stripe.com/fZu28t6Wa8rmd7n67udUY01',
     category: 'EXCEL TEMPLATE',
     theme: {
       accent: '#2E7D32', // brand-excel
